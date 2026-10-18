@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111820">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TradePilot">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>TradePilot</title>
+<style>
+:root{--bg:#111820;--panel:#19232d;--panel2:#202c37;--line:#2d3a46;--text:#edf3f8;--muted:#8d9aa7;--green:#00b985;--red:#ff5d66;--blue:#4ba3ff;--gold:#f0c45a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:80px}
+button,input,select{font:inherit}button{cursor:pointer;color:inherit;border:0}
+.top{position:sticky;top:0;z-index:5;background:#111820f2;backdrop-filter:blur(16px);padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;letter-spacing:.3px;font-size:19px}.brand span{color:var(--blue)}.account{font-size:11px;color:var(--muted);text-align:right}
+main{padding:14px;max-width:720px;margin:auto}.page{display:none}.page.active{display:block}
+h2{font-size:18px;margin:5px 0 14px}h3{font-size:14px;margin:0 0 10px}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.col{display:flex;flex-direction:column;gap:4px}
+.pill{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px}
+.quote{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}.quote:last-child{border-bottom:0}
+.symbol{font-weight:700}.subsymbol{font-size:11px;color:var(--muted);margin-top:4px}.price{font-variant-numeric:tabular-nums;font-weight:650;text-align:right}.change{font-size:11px;text-align:right;margin-top:4px}.positive{color:var(--green)}.negative{color:var(--red)}
+.tabs{display:flex;gap:6px;overflow:auto;margin-bottom:12px}.tabs button{white-space:nowrap;background:var(--panel2);padding:8px 11px;border-radius:8px;color:var(--muted)}.tabs button.selected{background:#244363;color:#fff}
+.chart-wrap{background:#121b23;border-radius:10px;overflow:hidden;border:1px solid var(--line)}canvas{display:block;width:100%;height:280px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}.metric{background:var(--panel2);padding:10px;border-radius:9px}.metric .v{font-size:17px;font-weight:700;margin-top:5px}
+.btn{padding:12px 14px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);font-weight:700}.btn.blue{background:#2676bd}.btn.buy{background:#078c69}.btn.sell{background:#c33e4b}.btn.full{width:100%}.tradebuttons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+input,select{background:#111a22;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:11px;width:100%;margin-top:5px}label{font-size:12px;color:var(--muted);display:block;margin-bottom:10px}
+.nav{position:fixed;z-index:10;bottom:0;left:0;right:0;background:#151f28f5;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:7px 4px calc(7px + env(safe-area-inset-bottom));backdrop-filter:blur(16px)}
+.nav button{background:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:5px 0}.nav button b{font-size:19px;font-weight:500}.nav button.active{color:var(--blue)}
+.notice{background:#302a1b;color:#f2d48a;border:1px solid #66572c;border-radius:9px;padding:10px;font-size:12px;line-height:1.45;margin-bottom:12px}
+.tablehead{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:6px;color:var(--muted);font-size:11px;padding:5px 0}.empty{text-align:center;padding:28px 10px;color:var(--muted)}
+.orderbox{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+small.tag{color:var(--gold);font-size:10px;border:1px solid #66572c;padding:3px 6px;border-radius:5px}
+@media(min-width:600px){main{padding:22px}.metrics{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">Trade<span>Pilot</span></div><div class="account">AKUN DEMO UI<br><strong style="color:var(--gold)">SIMULASI</strong></div></header>
+<main>
+<section id="quotes" class="page active">
+ <div class="row"><h2>Quotes</h2><button class="pill" onclick="toast('Daftar simbol demo')">＋ Simbol</button></div>
+ <div class="notice">MODE SIMULASI — harga dan perubahan di bawah adalah data contoh, bukan harga pasar Exness. Tidak ada order sungguhan yang dikirim.</div>
+ <div class="panel"><div class="row"><span class="muted">Daftar pantauan</span><span class="tiny">Bid / Ask</span></div><div id="quotesList"></div></div>
+ <div class="tiny">Ketuk instrumen untuk membuka chart.</div>
+</section>
+<section id="chart" class="page">
+ <div class="row"><div><h2 id="chartTitle">XAUUSD</h2><div class="tiny">Gold vs US Dollar · DATA SIMULASI</div></div><button class="pill" onclick="showPage('trade')">Trade ↗</button></div>
+ <div class="tabs" id="timeTabs"><button class="selected" data-tf="M1">M1</button><button data-tf="M5">M5</button><button data-tf="M15">M15</button><button data-tf="M30">M30</button><button data-tf="H1">H1</button><button data-tf="H4">H4</button><button data-tf="D1">D1</button></div>
+ <div class="panel" style="padding:8px"><div class="row" style="padding:5px 3px 10px"><span class="tiny">Candlesticks · EMA 9 (visual demo)</span><span id="chartPrice" class="price">2,345.60</span></div><div class="chart-wrap"><canvas id="candleCanvas" width="720" height="440"></canvas></div><div class="row" style="padding:10px 2px 2px"><span class="tiny">● EMA 9 &nbsp; ● EMA 21</span><span class="tiny">Chart ilustrasi</span></div></div>
+ <div class="metrics"><div class="metric"><div class="tiny">Bid</div><div class="v" id="chartBid">2,345.60</div></div><div class="metric"><div class="tiny">Ask</div><div class="v" id="chartAsk">2,345.90</div></div></div>
+ <div class="tradebuttons" style="margin-top:12px"><button class="btn buy" onclick="quickOrder('BUY')">BUY</button><button class="btn sell" onclick="quickOrder('SELL')">SELL</button></div>
+</section>
+<section id="trade" class="page">
+ <h2>Trade</h2>
+ <div class="notice">Order di halaman ini hanya dicatat di simulasi lokal. Akun Exness belum terhubung.</div>
+ <div class="panel"><div class="metrics"><div class="metric"><div class="tiny">Balance</div><div class="v" id="balance">$10,000.00</div></div><div class="metric"><div class="tiny">Equity</div><div class="v" id="equity">$10,000.00</div></div><div class="metric"><div class="tiny">Free Margin</div><div class="v" id="freeMargin">$10,000.00</div></div><div class="metric"><div class="tiny">Floating P/L</div><div class="v" id="floating">$0.00</div></div></div></div>
+ <div class="panel"><h3>New Order</h3><label>Symbol<select id="orderSymbol"><option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>BTCUSD</option><option>ETHUSD</option></select></label>
+ <div class="orderbox"><label>Volume (lot)<input id="lots" type="number" value="0.01" min="0.01" step="0.01"></label><label>Order type<select id="orderType"><option>Market Execution</option><option>Pending Order (simulasi)</option></select></label><label>Stop Loss<input id="sl" type="number" placeholder="Harga SL (opsional)"></label><label>Take Profit<input id="tp" type="number" placeholder="Harga TP (opsional)"></label></div>
+ <div class="tradebuttons"><button class="btn buy" onclick="placeOrder('BUY')">BUY</button><button class="btn sell" onclick="placeOrder('SELL')">SELL</button></div></div>
+ <div class="panel"><div class="row"><h3>Open Positions</h3><span id="positionCount" class="pill">0</span></div><div id="positions"><div class="empty">Tidak ada posisi terbuka</div></div></div>
+</section>
+<section id="history" class="page">
+ <h2>History</h2><div class="tabs"><button class="selected">All</button><button onclick="toast('Filter hari ini (demo)')">Today</button><button onclick="toast('Filter minggu ini (demo)')">This week</button></div>
+ <div class="panel"><div class="row"><span class="muted">Balance</span><strong id="historyBalance">$10,000.00</strong></div><div id="historyList"><div class="empty">Belum ada transaksi simulasi</div></div></div>
+</section>
+<section id="settings" class="page">
+ <h2>Settings</h2>
+ <div class="panel"><div class="row"><div class="col"><strong>TradePilot UI</strong><span class="tiny">Versi 0.2 · prototipe</span></div><small class="tag">SIMULASI</small></div></div>
+ <div class="panel"><h3>Connection</h3><div class="row"><span>Broker</span><strong>Belum terhubung</strong></div><div class="row" style="margin-top:12px"><span>Server</span><span class="muted">Tidak tersedia</span></div><div class="row" style="margin-top:12px"><span>Trading permissions</span><span class="negative">Nonaktif</span></div></div>
+ <div class="panel"><h3>Chart settings</h3><label>Default symbol<select id="defaultSymbol"><option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option><option>BTCUSD</option><option>ETHUSD</option></select></label><label>Appearance<select><option>Dark</option><option>Light (belum tersedia)</option></select></label></div>
+ <div class="panel"><h3>Reset demo</h3><p class="tiny">Menghapus posisi dan riwayat simulasi pada sesi ini.</p><button class="btn full" onclick="resetDemo()">Reset simulation</button></div>
+ <div class="notice">Jangan memasukkan kata sandi, OTP, atau API key broker ke prototipe ini. Koneksi trading sungguhan membutuhkan backend aman dan integrasi yang disetujui broker.</div>
+</section>
+</main>
+<nav class="nav">
+ <button data-page="quotes" class="active"><b>☷</b>Quotes</button><button data-page="chart"><b>▥</b>Chart</button><button data-page="trade"><b>⇄</b>Trade</button><button data-page="history"><b>◷</b>History</button><button data-page="settings"><b>⚙</b>Settings</button>
+</nav>
+<div id="toast" style="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#263746;padding:10px 15px;border-radius:9px;display:none;z-index:30;max-width:90%;text-align:center"></div>
+<script>
+const market = {
+ XAUUSD:{name:"Gold vs US Dollar",bid:2345.60,ask:2345.90,digits:2,change:0.42},
+ EURUSD:{name:"Euro vs US Dollar",bid:1.08425,ask:1.08439,digits:5,change:0.13},
+ GBPUSD:{name:"Pound vs US Dollar",bid:1.27130,ask:1.27148,digits:5,change:-0.21},
+ USDJPY:{name:"US Dollar vs Japanese Yen",bid:149.820,ask:149.838,digits:3,change:0.08},
+ BTCUSD:{name:"Bitcoin vs US Dollar",bid:67250.10,ask:67280.10,digits:2,change:1.27},
+ ETHUSD:{name:"Ethereum vs US Dollar",bid:3510.20,ask:3512.40,digits:2,change:-0.66}
+};
+let currentSymbol="XAUUSD", balance=10000, positions=[], history=[];
+const fmt=(n,d=2)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+function toast(s){let el=document.getElementById('toast');el.textContent=s;el.style.display='block';clearTimeout(window._toastTimer);window._toastTimer=setTimeout(()=>el.style.display='none',2400)}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='chart')drawChart();if(id==='trade')renderPositions();window.scrollTo(0,0)}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+function renderQuotes(){let root=document.getElementById('quotesList');root.innerHTML='';Object.entries(market).forEach(([s,q])=>{let d=document.createElement('div');d.className='quote';d.innerHTML=`<div><div class="symbol">${s}</div><div class="subsymbol">${q.name}</div></div><div><div class="price">${fmt(q.bid,q.digits)}</div><div class="change ${q.change>=0?'positive':'negative'}">${q.change>=0?'+':''}${q.change.toFixed(2)}%</div></div><div><div class="price">${fmt(q.ask,q.digits)}</div><div class="change muted">Ask</div></div>`;d.onclick=()=>selectSymbol(s);root.appendChild(d)})}
+function selectSymbol(s){currentSymbol=s;document.getElementById('chartTitle').textContent=s;document.getElementById('chartPrice').textContent=fmt(market[s].bid,market[s].digits);document.getElementById('chartBid').textContent=fmt(market[s].bid,market[s].digits);document.getElementById('chartAsk').textContent=fmt(market[s].ask,market[s].digits);document.getElementById('orderSymbol').value=s;showPage('chart')}
+function drawChart(){const c=document.getElementById('candleCanvas'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#121b23';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#283642';ctx.lineWidth=1;for(let i=1;i<6;i++){let y=i*h/6;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}for(let i=1;i<8;i++){let x=i*w/8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
+let seed=Array.from(currentSymbol).reduce((a,c)=>a+c.charCodeAt(0),0);let rand=()=>{seed=(seed*9301+49297)%233280;return seed/233280};let base=market[currentSymbol].bid,scale=currentSymbol==='EURUSD'||currentSymbol==='GBPUSD'?0.0005:currentSymbol==='USDJPY'?0.4:currentSymbol==='BTCUSD'?280:currentSymbol==='ETHUSD'?20:3;let vals=[],p=base;for(let i=0;i<48;i++){let o=p,cl=o+(rand()-.48)*scale,hi=Math.max(o,cl)+rand()*scale*.4,lo=Math.min(o,cl)-rand()*scale*.4;vals.push({o,cl,hi,lo});p=cl}let min=Math.min(...vals.map(v=>v.lo)),max=Math.max(...vals.map(v=>v.hi)),pad=22;let Y=v=>pad+(max-v)/(max-min||1)*(h-pad*2);let gap=w/vals.length,bw=gap*.48;
+vals.forEach((v,i)=>{let x=i*gap+gap/2,up=v.cl>=v.o;ctx.strokeStyle=up?'#00b985':'#ff5d66';ctx.fillStyle=ctx.strokeStyle;ctx.beginPath();ctx.moveTo(x,Y(v.hi));ctx.lineTo(x,Y(v.lo));ctx.stroke();let y=Y(Math.max(v.o,v.cl)),hh=Math.max(2,Math.abs(Y(v.o)-Y(v.cl)));ctx.fillRect(x-bw/2,y,bw,hh)});
+function ema(period,color){let out=[],a=2/(period+1),v=vals[0].cl;vals.forEach((c,i)=>{v=i===0?c.cl:c.cl*a+v*(1-a);out.push(v)});ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();out.forEach((v,i)=>i?ctx.lineTo(i*gap+gap/2,Y(v)):ctx.moveTo(i*gap+gap/2,Y(v)));ctx.stroke()}ema(9,'#f0c45a');ema(21,'#4ba3ff');ctx.fillStyle='#8d9aa7';ctx.font='15px sans-serif';ctx.fillText('SIMULATED CHART',12,22)}
+function quickOrder(side){showPage('trade');document.getElementById('orderSymbol').value=currentSymbol;placeOrder(side)}
+function placeOrder(side){let s=document.getElementById('orderSymbol').value,lot=Number(document.getElementById('lots').value),sl=document.getElementById('sl').value,tp=document.getElementById('tp').value;if(!Number.isFinite(lot)||lot<0.01){toast('Lot minimal simulasi 0.01');return}let q=market[s],price=side==='BUY'?q.ask:q.bid;let pos={id:Date.now(),symbol:s,side,lot,price,sl:sl?Number(sl):null,tp:tp?Number(tp):null,opened:new Date().toLocaleString('id-ID'),pl:0};positions.unshift(pos);history.unshift({...pos,action:'OPEN',closed:null});renderPositions();renderHistory();toast(`${side} ${lot.toFixed(2)} ${s} dicatat di simulasi`)}
+function renderPositions(){let root=document.getElementById('positions');document.getElementById('positionCount').textContent=positions.length;if(!positions.length){root.innerHTML='<div class="empty">Tidak ada posisi terbuka</div>'}else{root.innerHTML=positions.map(p=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div class="row"><strong class="${p.side==='BUY'?'positive':'negative'}">${p.side} ${p.lot.toFixed(2)} ${p.symbol}</strong><button class="pill" onclick="closePosition(${p.id})">Close</button></div><div class="row tiny" style="margin-top:8px"><span>Open ${fmt(p.price,market[p.symbol].digits)}</span><span>SL ${p.sl??'—'} · TP ${p.tp??'—'}</span></div></div>`).join('')}let floating=positions.reduce((a,p)=>a+p.pl,0);document.getElementById('balance').textContent='$'+fmt(balance);document.getElementById('equity').textContent='$'+fmt(balance+floating);document.getElementById('freeMargin').textContent='$'+fmt(balance+floating);document.getElementById('floating').textContent='$'+fmt(floating);document.getElementById('historyBalance').textContent='$'+fmt(balance)}
+function closePosition(id){let i=positions.findIndex(p=>p.id===id);if(i<0)return;let p=positions.splice(i,1)[0];let q=market[p.symbol],exit=p.side==='BUY'?q.bid:q.ask;let delta=(p.side==='BUY'?exit-p.price:p.price-exit)*p.lot*(p.symbol.includes('JPY')?1:1);p.action='CLOSE';p.closed=new Date().toLocaleString('id-ID');p.exit=exit;p.pl=delta;balance+=delta;history.unshift(p);renderPositions();renderHistory();toast('Posisi ditutup dalam simulasi')}
+function renderHistory(){let root=document.getElementById('historyList');if(!history.length){root.innerHTML='<div class="empty">Belum ada transaksi simulasi</div>';return}root.innerHTML=history.map(h=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div class="row"><strong>${h.action} · ${h.side} ${h.lot.toFixed(2)} ${h.symbol}</strong><span class="${(h.pl||0)>=0?'positive':'negative'}">${h.action==='CLOSE'?'$'+fmt(h.pl):'—'}</span></div><div class="tiny" style="margin-top:5px">${h.closed||h.opened} · Price ${fmt(h.exit||h.price,market[h.symbol].digits)}</div></div>`).join('')}
+function resetDemo(){if(!confirm('Reset semua posisi, saldo, dan history simulasi?'))return;balance=10000;positions=[];history=[];renderPositions();renderHistory();toast('Simulasi direset')}
+document.getElementById('timeTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#timeTabs button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');drawChart();toast('Timeframe '+b.dataset.tf+' — visual demo')});
+document.getElementById('defaultSymbol').onchange=e=>selectSymbol(e.target.value);
+renderQuotes();renderPositions();renderHistory();selectSymbol('XAUUSD');showPage('quotes');
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>

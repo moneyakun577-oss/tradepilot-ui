@@ -1,0 +1,18 @@
+{
+  "name": "TradePilot MT5-style Trading UI",
+  "short_name": "TradePilot",
+  "description": "Prototipe UI trading bergaya MT5. Simulasi saja, belum terhubung ke broker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111820",
+  "theme_color": "#111820",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

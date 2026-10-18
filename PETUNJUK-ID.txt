@@ -1,0 +1,28 @@
+TRADEPILOT — PROTOTIPE UI BERGAYA MT5 (SIMULASI)
+
+Isi:
+- index.html: aplikasi web responsif
+- manifest.webmanifest, sw.js, icon.svg: dukungan PWA dasar
+
+Fitur prototipe:
+- Navigasi Quotes, Chart, Trade, History, Settings
+- Instrumen contoh XAUUSD, EURUSD, GBPUSD, USDJPY, BTCUSD, ETHUSD
+- Grafik candlestick ilustratif, pilihan timeframe visual
+- Form order Buy/Sell, SL/TP, posisi simulasi, close posisi, history
+- Saldo dan equity simulasi
+
+BATASAN PENTING:
+Semua harga, quote, chart, saldo, order, dan P/L adalah data simulasi/ilustratif.
+Tidak ada koneksi Exness, feed harga live, eksekusi order broker, sinkronisasi akun, atau EA.
+Jangan gunakan sebagai alat untuk mengambil keputusan trading nyata.
+
+Cara membuat URL gratis dari iPhone (GitHub Pages):
+1. Buka github.com di Safari dan masuk/buat akun.
+2. Buat repository publik bernama tradepilot-ui (jangan upload data rahasia).
+3. Upload ke root repository: index.html, manifest.webmanifest, sw.js, icon.svg.
+4. Repository > Settings > Pages.
+5. Source: Deploy from a branch; branch main; folder /(root); Save.
+6. Tunggu hingga URL Pages muncul, buka URL di Safari.
+7. Safari > Bagikan > Tambahkan ke Layar Utama.
+
+Catatan: tampilan Add to Home Screen bergantung versi iOS. PWA butuh URL HTTPS untuk cache/offline.
